@@ -1,0 +1,13 @@
+<html>
+    <header>
+
+    </header>
+    <body>
+        <form action="/journal/edit/{{.Id}}/" method="POST">
+            <input type="hidden" name="_method" value="PUT">
+            <h4 name="title">{{.Title}}</h4>
+            <textarea name="body" rows="10" cols="20">{{.Body}}</textarea>
+            <button type="submit">Save</button>
+        </form>
+    </body>
+</html>
