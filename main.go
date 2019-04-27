@@ -13,16 +13,13 @@ import (
 )
 
 var templates = template.Must(template.ParseFiles("view/index.html", "view/item.html", "view/edit.html"))
+var connectionString = "root:29760338@/uecram?charset=utf8"
 
 type Entry struct {
 	Title string
 	Body  string
 	Id    int
-}
-
-type Entry2 struct {
-	Title string
-	Body  []byte
+	Date  string
 }
 
 type HtmlPage struct {
@@ -34,19 +31,21 @@ func Journal(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Hello World")
 	var tpl bytes.Buffer
 
-	db, err := sql.Open("mysql", "root:29760338@/uecram?charset=utf8")
+	db, err := sql.Open("mysql", connectionString)
 	checkErr(err)
 
 	// query
-	rows, err := db.Query("SELECT title, content FROM chengshair.journal_entry;")
+	rows, err := db.Query("SELECT title, content, created FROM chengshair.journal_entry;")
 	checkErr(err)
 	i := 1
 	for rows.Next() {
 		var title string
 		var content string
-		err = rows.Scan(&title, &content)
+		var created string
+
+		err = rows.Scan(&title, &content, &created)
 		checkErr(err)
-		templates.ExecuteTemplate(&tpl, "item.html", &Entry{Title: title, Body: content, Id: i})
+		templates.ExecuteTemplate(&tpl, "item.html", &Entry{Title: title, Body: content, Id: i, Date: created[0:10]})
 		i++
 	}
 
@@ -59,7 +58,7 @@ func Journal(w http.ResponseWriter, r *http.Request) {
 //JournalEdit edit post
 func JournalEdit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	db, err := sql.Open("mysql", "root:29760338@/uecram?charset=utf8")
+	db, err := sql.Open("mysql", connectionString)
 	checkErr(err)
 
 	// query
@@ -81,7 +80,7 @@ func JournalEdit(w http.ResponseWriter, r *http.Request) {
 func JournalUpdate(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	r.ParseForm()
-	db, err := sql.Open("mysql", "root:29760338@/uecram?charset=utf8")
+	db, err := sql.Open("mysql", connectionString)
 	// update
 	stmt, err := db.Prepare("UPDATE chengshair.journal_entry SET content=? WHERE idjournal_entry=?")
 	checkErr(err)
@@ -131,14 +130,25 @@ func MethodOverride(next http.Handler) http.Handler {
 
 func main() {
 
+	// fs := http.FileServer(http.Dir("./static"))
+	// http.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	r := mux.NewRouter()
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	r.HandleFunc("/journal", Journal)
 	r.HandleFunc("/journal/edit/{Id}/", JournalEdit).Methods("POST")
 	r.HandleFunc("/journal/edit/{Id}/", JournalUpdate).Methods("PUT")
 	http.Handle("/", r)
+
 	err := http.ListenAndServe(":8080", MethodOverride(r))
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 
+	// fs := http.FileServer(http.Dir("./static"))
+	// http.Handle("/static/", http.StripPrefix("/static/", fs))
+	// err := http.ListenAndServe(":8080", nil)
+	// if err != nil {
+	// 	log.Fatal("ListenAndServe: ", err)
+	// }
 }

@@ -1,7 +1,10 @@
 <form action="/journal/edit/{{.Id}}/" method="post">
     <div>
-        <h1>{{.Title}}</h1>
+        <h4> 
+            <span>{{.Title}}</span>
+            <button class="ml-5" style="display:inline-block;" name="edit_button_{{.Id}}">Edit</button>
+            <span class="ml-5">{{.Date}}</span>
+        </h4>
         <div>{{.Body}}</div>
-        <button name="edit_button_{{.Id}}">Edit</button>
     </div>
 </form>
