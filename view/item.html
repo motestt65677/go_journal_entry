@@ -1,10 +1,15 @@
 <form action="/journal/edit/{{.Id}}/" method="post">
-    <div>
-        <h4> 
-            <span>{{.Title}}</span>
-            <button class="ml-5" style="display:inline-block;" name="edit_button_{{.Id}}">Edit</button>
-            <span class="ml-5">{{.Date}}</span>
-        </h4>
-        <div>{{.Body}}</div>
+    <div style="background: white; padding:15px; margin: 15px;">
+        <div class="row">
+            <h1 class="col-6">{{.Title}}</h1>
+            <div class="col-2"></div>
+            <div class="col-4">
+                <div style="width:200; height:200px; background-color: teal; margin:5px;"></div>
+            </div>
+        </div>
+        <h5>{{.Author}}</h5>
+        <h5 style="color:#888888;">{{.Date}}</h5>
+        <!-- <button class="ml-5" style="display:inline-block;" name="edit_button_{{.Id}}">Edit</button> -->
     </div>
+
 </form>

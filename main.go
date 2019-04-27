@@ -16,10 +16,11 @@ var templates = template.Must(template.ParseFiles("view/index.html", "view/item.
 var connectionString = "root:29760338@/uecram?charset=utf8"
 
 type Entry struct {
-	Title string
-	Body  string
-	Id    int
-	Date  string
+	Title  string
+	Body   string
+	Id     int
+	Date   string
+	Author string
 }
 
 type HtmlPage struct {
@@ -35,17 +36,22 @@ func Journal(w http.ResponseWriter, r *http.Request) {
 	checkErr(err)
 
 	// query
-	rows, err := db.Query("SELECT title, content, created FROM chengshair.journal_entry;")
+	rows, err := db.Query("SELECT idjournal_entry, title, created, author FROM chengshair.journal_entry;")
 	checkErr(err)
 	i := 1
 	for rows.Next() {
+		var id int
 		var title string
-		var content string
 		var created string
+		var author string
 
-		err = rows.Scan(&title, &content, &created)
+		err = rows.Scan(&id, &title, &created, &author)
 		checkErr(err)
-		templates.ExecuteTemplate(&tpl, "item.html", &Entry{Title: title, Body: content, Id: i, Date: created[0:10]})
+		templates.ExecuteTemplate(&tpl, "item.html", &Entry{
+			Id:     id,
+			Title:  title,
+			Date:   created[0:10],
+			Author: author})
 		i++
 	}
 
