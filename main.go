@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,11 +17,12 @@ var templates = template.Must(template.ParseFiles("view/index.html", "view/item.
 var connectionString = "root:29760338@/uecram?charset=utf8"
 
 type Entry struct {
-	Title  string
-	Body   string
-	Id     int
-	Date   string
-	Author string
+	Title          string
+	Body           string
+	Id             int
+	Date           string
+	Author         string
+	CoverPhotoPath string
 }
 
 type HtmlPage struct {
@@ -48,10 +50,11 @@ func Journal(w http.ResponseWriter, r *http.Request) {
 		err = rows.Scan(&id, &title, &created, &author)
 		checkErr(err)
 		templates.ExecuteTemplate(&tpl, "item.html", &Entry{
-			Id:     id,
-			Title:  title,
-			Date:   created[0:10],
-			Author: author})
+			Id:             id,
+			Title:          title,
+			Date:           created[0:10],
+			Author:         author,
+			CoverPhotoPath: GetEntryImageUrl(id)})
 		i++
 	}
 
@@ -59,6 +62,19 @@ func Journal(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, tpl.String())
 	//templates.HTML()
 	renderTemplate(w, "index", &HtmlPage{Content: template.HTML(tpl.String())})
+}
+
+// GetEntryImageUrl gets path of a cover photo with id
+func GetEntryImageUrl(id int) string {
+	path := "./static/images/cover/" + strconv.Itoa(id) + "/"
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(files) > 0 {
+		return path + files[0].Name()
+	}
+	return ""
 }
 
 //JournalEdit edit post
