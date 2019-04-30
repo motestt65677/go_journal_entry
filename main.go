@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -112,7 +113,18 @@ func JournalPost(w http.ResponseWriter, r *http.Request) {
 	// update
 	stmt, err := db.Prepare("INSERT INTO chengshair.journal_entry (title, content, author) VALUES(?, ?, ?)")
 	checkErr(err)
-	_, err = stmt.Exec(r.Form["title"][0], r.Form["content"][0], "Engine")
+	var article = r.Form["content"][0]
+	var ary = strings.Split(article, "\r\n")
+	var title = ""
+	var content = ""
+
+	if len(ary) > 0 {
+		title = ary[0]
+		var titleLength = len(title)
+		content = article[titleLength:]
+	}
+
+	_, err = stmt.Exec(title, content, "Engine")
 	checkErr(err)
 
 	http.Redirect(w, r, "/journal", 301)
