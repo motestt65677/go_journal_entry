@@ -10,7 +10,12 @@
     </head>
     <body style="background-color:#fafafa;">
 
-        <div><h1 >ChengShair's Journal Entries </h1></div>
+        <div>
+            <h1 style="display: inline-block;">ChengShair's Journal Entries </h1>
+            <form action="/journal/new">
+                <button  style="float:right; ">New Post</button>
+            </form>
+        </div>
         <div>{{.Content}}</div>
 
     </body>

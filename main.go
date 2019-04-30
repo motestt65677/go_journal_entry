@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var templates = template.Must(template.ParseFiles("view/index.html", "view/item.html", "view/edit.html"))
+var templates = template.Must(template.ParseFiles("view/index.html", "view/item.html", "view/edit.html", "view/new.html"))
 var connectionString = "root:29760338@/uecram?charset=utf8"
 
 type Entry struct {
@@ -65,17 +65,6 @@ func Journal(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetEntryImageUrl gets path of a cover photo with id
-func GetEntryImageUrl(id int) string {
-	path := "./static/images/cover/" + strconv.Itoa(id) + "/"
-	files, err := ioutil.ReadDir(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if len(files) > 0 {
-		return path + files[0].Name()
-	}
-	return ""
-}
 
 //JournalEdit edit post
 func JournalEdit(w http.ResponseWriter, r *http.Request) {
@@ -111,6 +100,24 @@ func JournalUpdate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/journal", 301)
 }
 
+//JournalNew new route
+func JournalNew(w http.ResponseWriter, r *http.Request) {
+	templates.ExecuteTemplate(w, "new.html", nil)
+}
+
+//JournalPost post route
+func JournalPost(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	db, err := sql.Open("mysql", connectionString)
+	// update
+	stmt, err := db.Prepare("INSERT INTO chengshair.journal_entry (title, content, author) VALUES(?, ?, ?)")
+	checkErr(err)
+	_, err = stmt.Exec(r.Form["title"][0], r.Form["content"][0], "Engine")
+	checkErr(err)
+
+	http.Redirect(w, r, "/journal", 301)
+}
+
 func renderTemplate(w http.ResponseWriter, tmpl string, entry *HtmlPage) {
 
 	err := templates.ExecuteTemplate(w, tmpl+".html", entry)
@@ -123,6 +130,18 @@ func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetEntryImageUrl(id int) string {
+	path := "./static/images/cover/" + strconv.Itoa(id) + "/"
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return ""
+	}
+	if len(files) > 0 {
+		return path + files[0].Name()
+	}
+	return ""
 }
 
 //MethodOverride middlewaear to handle put and patch method
@@ -157,9 +176,12 @@ func main() {
 
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	r.HandleFunc("/journal", Journal)
+	r.HandleFunc("/journal", Journal).Methods("GET")
+	r.HandleFunc("/journal", JournalPost).Methods("POST")
 	r.HandleFunc("/journal/edit/{Id}/", JournalEdit).Methods("POST")
 	r.HandleFunc("/journal/edit/{Id}/", JournalUpdate).Methods("PUT")
+	r.HandleFunc("/journal/new", JournalNew)
+
 	http.Handle("/", r)
 
 	err := http.ListenAndServe(":8080", MethodOverride(r))
