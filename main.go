@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var templates = template.Must(template.ParseFiles("view/index.html", "view/item.html", "view/edit.html", "view/new.html"))
+var templates = template.Must(template.ParseFiles("view/index.html", "view/item.html", "view/edit.html", "view/new.html", "view/journal.html"))
 var connectionString = "root:29760338@/uecram?charset=utf8"
 
 type Entry struct {
@@ -24,6 +24,7 @@ type Entry struct {
 	Date           string
 	Author         string
 	CoverPhotoPath string
+	Content        template.HTML
 }
 
 type HtmlPage struct {
@@ -31,7 +32,7 @@ type HtmlPage struct {
 }
 
 // Journal index page content
-func Journal(w http.ResponseWriter, r *http.Request) {
+func JournalsGet(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, "Hello World")
 	var tpl bytes.Buffer
 
@@ -63,6 +64,41 @@ func Journal(w http.ResponseWriter, r *http.Request) {
 	//fmt.Fprintf(w, tpl.String())
 	//templates.HTML()
 	renderTemplate(w, "index", &HtmlPage{Content: template.HTML(tpl.String())})
+}
+
+func JournalGet(w http.ResponseWriter, r *http.Request) {
+	//fmt.Fprintf(w, "Hello World")
+
+	vars := mux.Vars(r)
+
+	db, err := sql.Open("mysql", connectionString)
+	checkErr(err)
+
+	// query
+	rows, err := db.Query("SELECT idjournal_entry, title, created, author, content FROM chengshair.journal_entry WHERE idjournal_entry = ?;", vars["Id"])
+	checkErr(err)
+	if rows.Next() {
+		var id int
+		var title string
+		var created string
+		var author string
+		var content string
+
+		err = rows.Scan(&id, &title, &created, &author, &content)
+		checkErr(err)
+		templates.ExecuteTemplate(w, "journal.html", &Entry{
+			Id:             id,
+			Title:          title,
+			Date:           created[0:10],
+			Author:         author,
+			CoverPhotoPath: GetEntryImageUrl(id),
+			Content:        template.HTML(ConvertNewLineToBr(content))})
+	}
+
+	//fmt.Fprintf(w, tpl.String())
+	//fmt.Fprintf(w, tpl.String())
+	//templates.HTML()
+
 }
 
 // GetEntryImageUrl gets path of a cover photo with id
@@ -145,8 +181,10 @@ func checkErr(err error) {
 }
 
 func GetEntryImageUrl(id int) string {
-	path := "./static/images/cover/" + strconv.Itoa(id) + "/"
-	files, err := ioutil.ReadDir(path)
+	path := "/static/images/cover/" + strconv.Itoa(id) + "/"
+	pathForReadDir := "./static/images/cover/" + strconv.Itoa(id) + "/"
+
+	files, err := ioutil.ReadDir(pathForReadDir)
 	if err != nil {
 		return ""
 	}
@@ -181,6 +219,11 @@ func MethodOverride(next http.Handler) http.Handler {
 	})
 }
 
+//ConvertNewLineToBr Converts /r/n to <br>
+func ConvertNewLineToBr(content string) string {
+	return strings.ReplaceAll(content, "\r", "<br>")
+}
+
 func main() {
 
 	// fs := http.FileServer(http.Dir("./static"))
@@ -188,7 +231,8 @@ func main() {
 
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	r.HandleFunc("/journal", Journal).Methods("GET")
+	r.HandleFunc("/journals", JournalsGet).Methods("GET")
+	r.HandleFunc("/journal/{Id}/", JournalGet).Methods("GET")
 	r.HandleFunc("/journal", JournalPost).Methods("POST")
 	r.HandleFunc("/journal/edit/{Id}/", JournalEdit).Methods("POST")
 	r.HandleFunc("/journal/edit/{Id}/", JournalUpdate).Methods("PUT")

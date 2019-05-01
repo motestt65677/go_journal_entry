@@ -1,11 +1,11 @@
-<form action="/journal/edit/{{.Id}}/" method="post">
+<div class="hover_hand" onclick="location.href='/journal/{{.Id}}/'" style="display:block; cursor: pointer;">
     <div style="background: white; padding:15px; margin: 15px;">
         <div class="row">
             <h1 class="col-6">{{.Title}}</h1>
             <div class="col-2"></div>
             <div class="col-4">
-                <div style="width:200; height:200px; margin:5px;">
-                    <a href="" class="image_box" style="background-image: url({{.CoverPhotoPath}}); "></a>
+                <div style="height:15em; width:85%; margin:10%;">
+                    <div href="" class="image_box" style="background-image: url({{.CoverPhotoPath}}); "></div>
                 </div>
             </div>
         </div>
@@ -13,5 +13,4 @@
         <h5 style="color:#888888;">{{.Date}}</h5>
         <!-- <button class="ml-5" style="display:inline-block;" name="edit_button_{{.Id}}">Edit</button> -->
     </div>
-
-</form>
+</div>
