@@ -6,7 +6,7 @@
         <form action="/journal/edit/{{.Id}}/" method="POST">
             <input type="hidden" name="_method" value="PUT">
             <h4 name="title">{{.Title}} <span class="mr-5">a</span></h4>
-            <textarea name="body" rows="10" cols="20">{{.Body}}</textarea>
+            <textarea name="body" id="main_input" rows="10" cols="20">{{.Body}}</textarea>
             <button type="submit">Save</button>
         </form>
     </body>
