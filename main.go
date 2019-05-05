@@ -120,7 +120,10 @@ func JournalEdit(w http.ResponseWriter, r *http.Request) {
 	checkErr(err)
 
 	i, err := strconv.Atoi(vars["Id"])
-	templates.ExecuteTemplate(w, "edit.html", &Entry{Title: title, Body: content, Id: i})
+	templates.ExecuteTemplate(w, "edit.html", &Entry{Title: title,
+		Body:    content,
+		Id:      i,
+		Content: template.HTML(content)})
 
 }
 
@@ -132,9 +135,9 @@ func JournalUpdate(w http.ResponseWriter, r *http.Request) {
 	// update
 	stmt, err := db.Prepare("UPDATE chengshair.journal_entry SET content=? WHERE idjournal_entry=?")
 	checkErr(err)
-	_, err = stmt.Exec(r.Form["body"][0], vars["Id"])
+	_, err = stmt.Exec(r.Form["hidden_content"][0], vars["Id"])
 	checkErr(err)
-	http.Redirect(w, r, "/journal", 301)
+	http.Redirect(w, r, "/journal/"+vars["Id"]+"/", 301)
 }
 
 //JournalNew new route
@@ -219,9 +222,14 @@ func MethodOverride(next http.Handler) http.Handler {
 	})
 }
 
-//ConvertNewLineToBr Converts /r/n to <br>
+//ConvertNewLineToBr Converts /r to <br>
 func ConvertNewLineToBr(content string) string {
 	return strings.ReplaceAll(content, "\r", "<br>")
+}
+
+//ConvertBrToNewLine Converts <br> to /r
+func ConvertBrToNewLine(content string) string {
+	return strings.ReplaceAll(content, "<br>", "\r")
 }
 
 func main() {
@@ -234,7 +242,7 @@ func main() {
 	r.HandleFunc("/journals", JournalsGet).Methods("GET")
 	r.HandleFunc("/journal/{Id}/", JournalGet).Methods("GET")
 	r.HandleFunc("/journal", JournalPost).Methods("POST")
-	r.HandleFunc("/journal/edit/{Id}/", JournalEdit).Methods("POST")
+	r.HandleFunc("/journal/edit/{Id}/", JournalEdit).Methods("GET")
 	r.HandleFunc("/journal/edit/{Id}/", JournalUpdate).Methods("PUT")
 	r.HandleFunc("/journal/new", JournalNew)
 

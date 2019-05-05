@@ -1,13 +1,68 @@
 <html>
-    <header>
-
-    </header>
+    <head>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+        <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    </head>
     <body>
-        <form action="/journal/edit/{{.Id}}/" method="POST">
+        <div class="toolbar">
+            <a href="#" data-command='h2'><i class='fa fa-9x'>H2</i></a>
+            <a href="#" data-command='undo'><i class='fa fa-undo fa-9x'></i></a>
+            <a href="#" data-command='createlink'><i class='fa fa-link fa-9x'></i></a>
+            <a href="#" data-command='justifyLeft'><i class='fa fa-align-left fa-9x'></i></a>
+            <a href="#" data-command='superscript'><i class='fa fa-superscript fa-9x'></i></a>
+        </div>
+
+
+        <form id="form1" action="/journal/edit/{{.Id}}/" method="POST" onsubmit="AddContentToHidden();">
             <input type="hidden" name="_method" value="PUT">
             <h4 name="title">{{.Title}} <span class="mr-5">a</span></h4>
-            <textarea name="body" id="main_input" rows="10" cols="20">{{.Body}}</textarea>
+            
+            <div id="content" nam="content" contenteditable="true" style="padding:3%; font-size:2em;">
+                {{.Content}} 
+            </div>
+            
             <button type="submit">Save</button>
         </form>
+
+        <script type="text/javascript">
+            
+            function AddContentToHidden(){
+                var form = document.getElementById("form1")
+                var text = document.getElementById("content")
+                var input = document.createElement("input");   // Create a <button> element
+                input.type = "hidden";                  // Insert text
+                input.name = "hidden_content"
+                input.value = text.innerHTML;
+                form.appendChild(input); 
+                //console.log(document.getElementById("hidden_content").value);
+            }
+
+        </script>
     </body>
+
+    <script>
+        $('.toolbar a').click(function(e) {
+            debugger;
+            var command = $(this).data('command');
+            
+            if (command == 'h1' || command == 'h2' || command == 'p') {
+            document.execCommand('formatBlock', false, command);
+            }
+            
+            if (command == 'forecolor' || command == 'backcolor') {
+            document.execCommand($(this).data('command'), false, $(this).data('value'));
+            }
+            
+            if (command == 'createlink' || command == 'insertimage') {
+            url = prompt('Enter the link here: ','http:\/\/');
+            document.execCommand($(this).data('command'), false, url);
+            }
+            
+            else document.execCommand($(this).data('command'), false, null);
+            
+        });
+    </script>
 </html>
