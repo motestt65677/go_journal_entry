@@ -38,3 +38,11 @@
     transform:scale(.9);
     box-shadow: 0px 0px 8px 2px #000000;
 }
+
+blockquote {
+    display: block;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    margin-inline-start: 40px;
+    margin-inline-end: 40px;
+}

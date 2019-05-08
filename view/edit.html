@@ -5,14 +5,23 @@
             src="https://code.jquery.com/jquery-3.4.1.min.js"
             integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
             crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     </head>
     <body>
         <div class="toolbar">
+            <a href="#" data-command='bold'><i class='fas fa-bold fa-5x'></i></a>
+            <a href="#" data-command='italic'><i class='fas fa-italic fa-5x'></i></a>
+            <a href="#" data-command='createlink'><i class='fas fa-link fa-5x'></i></a>
+            <a href="#" data-command='h1'><i class='fas fa-heading fa-5x'></i></a>
+            <a href="#" data-command='blockquote'><i class='fas fa-quote-left fa-5x'></i></a>
+
+
+<!--             
             <a href="#" data-command='h2'><i class='fa fa-9x'>H2</i></a>
-            <a href="#" data-command='undo'><i class='fa fa-undo fa-9x'></i></a>
-            <a href="#" data-command='createlink'><i class='fa fa-link fa-9x'></i></a>
-            <a href="#" data-command='justifyLeft'><i class='fa fa-align-left fa-9x'></i></a>
-            <a href="#" data-command='superscript'><i class='fa fa-superscript fa-9x'></i></a>
+            <a href="#" data-command='undo'><i class='fa fa-undo fa-5x'></i></a>
+            <a href="#" data-command='createlink'><i class='fa fa-link fa-5x'></i></a>
+            <a href="#" data-command='justifyLeft'><i class='fa fa-align-left fa-5x'></i></a>
+            <a href="#" data-command='superscript'><i class='fa fa-superscript fa-5x'></i></a> -->
         </div>
 
 
@@ -45,10 +54,10 @@
 
     <script>
         $('.toolbar a').click(function(e) {
-            debugger;
+
             var command = $(this).data('command');
             
-            if (command == 'h1' || command == 'h2' || command == 'p') {
+            if (command == 'h1' || command == 'h2' || command == 'p' || command == 'blockquote') {
             document.execCommand('formatBlock', false, command);
             }
             
