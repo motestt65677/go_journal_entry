@@ -6,14 +6,31 @@
             integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
             crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
     </head>
     <body>
-        <div class="toolbar">
-            <a href="#" data-command='bold'><i class='fas fa-bold fa-5x'></i></a>
-            <a href="#" data-command='italic'><i class='fas fa-italic fa-5x'></i></a>
-            <a href="#" data-command='createlink'><i class='fas fa-link fa-5x'></i></a>
-            <a href="#" data-command='h1'><i class='fas fa-heading fa-5x'></i></a>
-            <a href="#" data-command='blockquote'><i class='fas fa-quote-left fa-5x'></i></a>
+
+
+
+        <form id="form1" action="/journal/edit/{{.Id}}/" method="POST" onsubmit="AddContentToHidden();">
+            <input type="hidden" name="_method" value="PUT">
+            <div class="one-edge-shadow" style="height:5%; padding:2%; border:1px;">
+                <span>X</span>
+                <button style="float:right;">Publish</button>                    
+            </div>
+
+            <div id="content" nam="content" contenteditable="true" style="padding:3%; font-size:5em; min-height: 100%">
+                {{.Content}} 
+            </div>
+            
+            
+        </form>
+        <div id="toolbar" class="toolbar">
+            <a href="#" data-command='bold'><i class='fas fa-bold fa-5x ml-5'></i></a>
+            <a href="#" data-command='italic'><i class='fas fa-italic fa-5x ml-5'></i></a>
+            <a href="#" data-command='createlink'><i class='fas fa-link fa-5x ml-5'></i></a>
+            <a href="#" data-command='h1'><i class='fas fa-heading fa-5x ml-5'></i></a>
+            <a href="#" data-command='blockquote'><i class='fas fa-quote-left fa-5x ml-5'></i></a>
 
 
 <!--             
@@ -23,55 +40,39 @@
             <a href="#" data-command='justifyLeft'><i class='fa fa-align-left fa-5x'></i></a>
             <a href="#" data-command='superscript'><i class='fa fa-superscript fa-5x'></i></a> -->
         </div>
-
-
-        <form id="form1" action="/journal/edit/{{.Id}}/" method="POST" onsubmit="AddContentToHidden();">
-            <input type="hidden" name="_method" value="PUT">
-            <h4 name="title">{{.Title}} <span class="mr-5">a</span></h4>
-            
-            <div id="content" nam="content" contenteditable="true" style="padding:3%; font-size:2em;">
-                {{.Content}} 
-            </div>
-            
-            <button type="submit">Save</button>
-        </form>
-
         <script type="text/javascript">
-            
-            function AddContentToHidden(){
-                var form = document.getElementById("form1")
-                var text = document.getElementById("content")
-                var input = document.createElement("input");   // Create a <button> element
-                input.type = "hidden";                  // Insert text
-                input.name = "hidden_content"
-                input.value = text.innerHTML;
-                form.appendChild(input); 
-                //console.log(document.getElementById("hidden_content").value);
-            }
+        function AddContentToHidden(){
+            var form = document.getElementById("form1")
+            var text = document.getElementById("content")
+            var input = document.createElement("input");   // Create a <button> element
+            input.type = "hidden";                  // Insert text
+            input.name = "hidden_content"
+            input.value = text.innerHTML;
+            form.appendChild(input); 
+            //console.log(document.getElementById("hidden_content").value);
+        }
+        </script>
+        <script>
+            $('.toolbar a').click(function(e) {
 
+                var command = $(this).data('command');
+                
+                if (command == 'h1' || command == 'h2' || command == 'p' || command == 'blockquote') {
+                document.execCommand('formatBlock', false, command);
+                }
+                
+                if (command == 'forecolor' || command == 'backcolor') {
+                document.execCommand($(this).data('command'), false, $(this).data('value'));
+                }
+                
+                if (command == 'createlink' || command == 'insertimage') {
+                url = prompt('Enter the link here: ','http:\/\/');
+                document.execCommand($(this).data('command'), false, url);
+                }
+                
+                else document.execCommand($(this).data('command'), false, null);
+                
+            });
         </script>
     </body>
-
-    <script>
-        $('.toolbar a').click(function(e) {
-
-            var command = $(this).data('command');
-            
-            if (command == 'h1' || command == 'h2' || command == 'p' || command == 'blockquote') {
-            document.execCommand('formatBlock', false, command);
-            }
-            
-            if (command == 'forecolor' || command == 'backcolor') {
-            document.execCommand($(this).data('command'), false, $(this).data('value'));
-            }
-            
-            if (command == 'createlink' || command == 'insertimage') {
-            url = prompt('Enter the link here: ','http:\/\/');
-            document.execCommand($(this).data('command'), false, url);
-            }
-            
-            else document.execCommand($(this).data('command'), false, null);
-            
-        });
-    </script>
 </html>
