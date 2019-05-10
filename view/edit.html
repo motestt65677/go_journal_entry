@@ -41,18 +41,29 @@
             <a href="#" data-command='superscript'><i class='fa fa-superscript fa-5x'></i></a> -->
         </div>
         <script type="text/javascript">
-        function AddContentToHidden(){
-            var form = document.getElementById("form1")
-            var text = document.getElementById("content")
-            var input = document.createElement("input");   // Create a <button> element
-            input.type = "hidden";                  // Insert text
-            input.name = "hidden_content"
-            input.value = text.innerHTML;
-            form.appendChild(input); 
-            //console.log(document.getElementById("hidden_content").value);
-        }
+            function AddContentToHidden(){
+                var form = document.getElementById("form1")
+
+                var content = document.getElementById("content")
+                var title = "<div>" + content.firstElementChild.textContent + "</div>";                
+                var body = content.innerHTML.replace(title,'');
+                
+                var hidden_title = document.createElement("input");   // Create a <button> element
+                hidden_title.type = "hidden";                  // Insert text
+                hidden_title.name = "hidden_title"
+                hidden_title.value = title;
+                form.appendChild(hidden_title); 
+                var hidden_body = document.createElement("input");   // Create a <button> element
+                hidden_body.type = "hidden";                  // Insert text
+                hidden_body.name = "hidden_body"
+                hidden_body.value = body;
+                form.appendChild(hidden_body); 
+                //console.log(document.getElementById("hidden_content").value);
+            }
+
         </script>
         <script>
+                        
             $('.toolbar a').click(function(e) {
 
                 var command = $(this).data('command');
@@ -73,6 +84,12 @@
                 else document.execCommand($(this).data('command'), false, null);
                 
             });
+
+            $(".editable").on('keydown', function(event) {
+            if (event.keyCode === 8 && $(this).html() == '<div><br></div>') {
+                event.preventDefault();
+            }
+            })
         </script>
     </body>
 </html>

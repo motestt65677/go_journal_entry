@@ -5,14 +5,18 @@
     </head>
     <body>
         <div>
-            <div style="padding:3%;">
+            <div style="padding:3%;" class="mb-4">
                 <h1 style="font-size: 4em; max-width: 80%; ">{{.Title}}</h1>
                 <span class="dot v-a-middle mt-3" ></span>
                 <span class="ml-2 v-a-middle small-title" >{{.Author}}</span>
                 <span class="ml-2 v-a-middle small-title" style="color:rgb(0,0,0,0.54);">{{.Date}}</span>
                 <a rel="stylesheet" href="/journal/edit/{{.Id}}/" style="float:right">Edit</a>
             </div>
-            <div class="mt-4" style="height: 30%; background-image: url({{.CoverPhotoPath}});" ></div>
+            
+            {{ if .CoverPhotoPath}}
+            <div class="" style="min-height: 30%; background-image: url({{.CoverPhotoPath}});" ></div>
+            {{ end }}
+            
             <div style="margin: 2% 2% 2% 2%; padding:3%; font-size:2em;">
                {{.Content}} 
             </div>
