@@ -2,21 +2,96 @@
     <head>
         <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css">
         <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+        <script
+            src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous">
+        </script>
+
     </head>
-    <body>
-        <form action="/journal" method="POST">
+    <body onload="">
+        <form id="form1" action="/journal" method="POST" onsubmit="AddContentToHidden();">
             <div class="one-edge-shadow" style="height:5%; padding:2%; border:1px;">
                 <span>X</span>
                 <button style="float:right;">Publish</button>                    
             </div>
 
-            <div>
-                <!-- <textarea name="content" cols="30" rows="10"></textarea> -->
-                <textarea autofocus name="content" contenteditable="true" 
-                style=" border:0px; width:100%; height:95%; padding:5% ; font-size: 5em; line-height: 2em; ">
-                </textarea>
+
+               
+            <div id="content" name="content" contenteditable="true" style="padding:3%; font-size:5em; min-height: 100%;">
+                <div><br></div>
             </div>
+
         </form>
 
+
+        <div id="toolbar" class="toolbar">
+            <a href="#" data-command='bold'><i class='fas fa-bold fa-5x ml-5'></i></a>
+            <a href="#" data-command='italic'><i class='fas fa-italic fa-5x ml-5'></i></a>
+            <a href="#" data-command='createlink'><i class='fas fa-link fa-5x ml-5'></i></a>
+            <a href="#" data-command='h1'><i class='fas fa-heading fa-5x ml-5'></i></a>
+            <a href="#" data-command='blockquote'><i class='fas fa-quote-left fa-5x ml-5'></i></a>
+
+
+<!--             
+            <a href="#" data-command='h2'><i class='fa fa-9x'>H2</i></a>
+            <a href="#" data-command='undo'><i class='fa fa-undo fa-5x'></i></a>
+            <a href="#" data-command='createlink'><i class='fa fa-link fa-5x'></i></a>
+            <a href="#" data-command='justifyLeft'><i class='fa fa-align-left fa-5x'></i></a>
+            <a href="#" data-command='superscript'><i class='fa fa-superscript fa-5x'></i></a> -->
+        </div>
+        <script type="text/javascript">
+            function AddContentToHidden(){
+                var form = document.getElementById("form1")
+
+                var content = document.getElementById("content")
+                var title = content.firstElementChild.outerHTML;                
+                var body = content.innerHTML.replace(title,'');
+
+                var hidden_title = document.createElement("input");   // Create a <button> element
+                hidden_title.type = "hidden";                  // Insert text
+                hidden_title.name = "hidden_title"
+                hidden_title.value = title;
+                form.appendChild(hidden_title); 
+                var hidden_body = document.createElement("input");   // Create a <button> element
+                hidden_body.type = "hidden";                  // Insert text
+                hidden_body.name = "hidden_body"
+                hidden_body.value = body;
+                form.appendChild(hidden_body); 
+                //console.log(document.getElementById("hidden_content").value);
+            }
+
+        </script>
+        <script>
+                        
+            $('.toolbar a').click(function(e) {
+
+                var command = $(this).data('command');
+                
+                if (command == 'h1' || command == 'h2' || command == 'p' || command == 'blockquote') {
+                document.execCommand('formatBlock', false, command);
+                }
+                
+                if (command == 'forecolor' || command == 'backcolor') {
+                document.execCommand($(this).data('command'), false, $(this).data('value'));
+                }
+                
+                if (command == 'createlink' || command == 'insertimage') {
+                url = prompt('Enter the link here: ','http:\/\/');
+                document.execCommand($(this).data('command'), false, url);
+                }
+                
+                else document.execCommand($(this).data('command'), false, null);
+                
+            });
+
+            $(".editable").on('keydown', function(event) {
+            if (event.keyCode === 8 && $(this).html() == '<div><br></div>') {
+                event.preventDefault();
+            }
+            })
+        </script>
     </body>
 </html>

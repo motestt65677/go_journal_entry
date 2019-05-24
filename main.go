@@ -18,7 +18,7 @@ var templates = template.Must(template.ParseFiles("view/index.html", "view/item.
 var connectionString = "root:29760338@/uecram?charset=utf8"
 
 type Entry struct {
-	Title          string
+	Title          template.HTML
 	Body           string
 	Id             int
 	Date           string
@@ -53,7 +53,7 @@ func JournalsGet(w http.ResponseWriter, r *http.Request) {
 		checkErr(err)
 		templates.ExecuteTemplate(&tpl, "item.html", &Entry{
 			Id:             id,
-			Title:          title,
+			Title:          template.HTML(title),
 			Date:           created[0:10],
 			Author:         author,
 			CoverPhotoPath: GetEntryImageUrl(id)})
@@ -88,11 +88,11 @@ func JournalGet(w http.ResponseWriter, r *http.Request) {
 		checkErr(err)
 		templates.ExecuteTemplate(w, "journal.html", &Entry{
 			Id:             id,
-			Title:          title,
+			Title:          template.HTML(title),
 			Date:           created[0:10],
 			Author:         author,
 			CoverPhotoPath: GetEntryImageUrl(id),
-			Content:        template.HTML(ConvertNewLineToBr(content))})
+			Content:        template.HTML(content)})
 	}
 
 	//fmt.Fprintf(w, tpl.String())
@@ -120,10 +120,11 @@ func JournalEdit(w http.ResponseWriter, r *http.Request) {
 	checkErr(err)
 
 	i, err := strconv.Atoi(vars["Id"])
-	templates.ExecuteTemplate(w, "edit.html", &Entry{Title: title,
+	templates.ExecuteTemplate(w, "edit.html", &Entry{
+		Title:   template.HTML(title),
 		Body:    content,
 		Id:      i,
-		Content: template.HTML(content)})
+		Content: template.HTML(title + content)})
 
 }
 
@@ -133,11 +134,16 @@ func JournalUpdate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	db, err := sql.Open("mysql", connectionString)
 	// update
-	stmt, err := db.Prepare("UPDATE chengshair.journal_entry SET content=? WHERE idjournal_entry=?")
+	stmt, err := db.Prepare("UPDATE chengshair.journal_entry SET title=?, content=? WHERE idjournal_entry=?")
 	checkErr(err)
-	_, err = stmt.Exec(r.Form["hidden_content"][0], vars["Id"])
+
+	var title = r.Form["hidden_title"][0]
+	var body = r.Form["hidden_body"][0]
+
+	_, err = stmt.Exec(title, body, vars["Id"])
 	checkErr(err)
 	http.Redirect(w, r, "/journal/"+vars["Id"]+"/", 301)
+	//http.Redirect(w, r, "/journals", 301)
 }
 
 //JournalNew new route
@@ -152,21 +158,13 @@ func JournalPost(w http.ResponseWriter, r *http.Request) {
 	// update
 	stmt, err := db.Prepare("INSERT INTO chengshair.journal_entry (title, content, author) VALUES(?, ?, ?)")
 	checkErr(err)
-	var article = r.Form["content"][0]
-	var ary = strings.Split(article, "\r\n")
-	var title = ""
-	var content = ""
+	var title = r.Form["hidden_title"][0]
+	var body = r.Form["hidden_body"][0]
 
-	if len(ary) > 0 {
-		title = ary[0]
-		var titleLength = len(title)
-		content = article[titleLength:]
-	}
-
-	_, err = stmt.Exec(title, content, "Engine")
+	_, err = stmt.Exec(title, body, "Engine")
 	checkErr(err)
 
-	http.Redirect(w, r, "/journal", 301)
+	http.Redirect(w, r, "/journals", 301)
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, entry *HtmlPage) {
